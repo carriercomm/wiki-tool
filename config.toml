@@ -1,0 +1,39 @@
+baseurl = "http://yourSiteHere/"
+languageCode = "en-us"
+title = "My New Hugo Site"
+
+
+contentdir = "content"
+layoutdir = "layouts"
+publishdir = "public"
+
+[params]
+  description = "TotalSim website, repositories, and blog"
+  author = "TotalSim LLC"
+
+  # Content from each navbardir will appear in the navbar
+  # with the name of the directory being the name.
+  # If there is more than one page in the directory,
+  # then there will be a popdown for each page
+  navbardirs = ["about","services","contact"]
+
+  # will use this style from highlight.js
+  highlightStyle = "mono-blue"
+
+[[menu.main]]
+  name = "News"
+  url = "/news"
+
+
+# WIKI_MENUS_START
+[[menu.wiki]]
+name="geometry"
+parent=""
+[[menu.wiki]]
+name="sub-geometry"
+parent="geometry"
+[[menu.wiki]]
+name="scripts"
+parent=""
+# END
+
