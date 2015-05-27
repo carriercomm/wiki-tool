@@ -9,13 +9,14 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/pgruenbacher/log"
 )
 
 const (
-	start      string = "WIKI_MENUS_START"
-	end        string = "END"
-	configFile string = "config.toml"
-	title      string = "[menu.wiki]"
+	start string = "WIKI_MENUS_START"
+	end   string = "END"
+	title string = "[menu.wiki]"
 )
 
 type fileList []fileI
@@ -35,8 +36,9 @@ type menuEntry struct {
 func main() {
 	searchDirPtr := flag.String("directory", "content/wiki", "the directory for the wiki")
 	searchWordPtr := flag.String("replace", "DIRECTORY", "the string to replace")
+	configFilePtr := flag.String("config", "src/config.toml", "path to config file")
 	flag.Parse()
-	fmt.Println("searching:", *searchDirPtr)
+	log.Info("searching: %s", *searchDirPtr)
 
 	fileList := make([]fileI, 0)
 
@@ -65,12 +67,12 @@ func main() {
 			}
 			// for a parent menu
 			var grandparent string
-			if len(array) >= 3 {
+			wikiIndex := indexOf(array, "wiki")
+			if (len(array) - wikiIndex) > 2 {
 				grandparent = array[len(array)-2]
 			} else {
 				grandparent = ""
 			}
-
 			if !within(menuList, parent) && file.info.IsDir() {
 				entry := menuEntry{
 					title:      title,
@@ -88,23 +90,23 @@ func main() {
 		}
 
 	}
-	writeConfig(menuList)
+	writeConfig(menuList, *configFilePtr)
 	// for _, e := range menuList {
 	// 	fmt.Println(e)
 	// }
 	return
 }
 
-func writeConfig(menuList []menuEntry) {
+func writeConfig(menuList []menuEntry, configFile string) {
 	output := make([]string, 0)
 	for _, menu := range menuList {
 		output = append(output, "[[menu.wiki]]\n")
 		output = append(output, fmt.Sprintf("name=\"%s\"\n", menu.name))
 		output = append(output, fmt.Sprintf("parent=\"%s\"\n", menu.parent))
-		fmt.Println(output)
+		output = append(output, fmt.Sprintf("identifier=\"%s\"\n", menu.name))
 	}
 
-	lines, err := readLines("config.toml")
+	lines, err := readLines(configFile)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -113,9 +115,7 @@ func writeConfig(menuList []menuEntry) {
 	var en int
 	// delete all entries within first
 	for i, line := range lines {
-		fmt.Print(line)
 		if strings.Contains(line, start) {
-			fmt.Println("true!")
 			st = i + 1
 		}
 		if strings.Contains(line, end) {
@@ -129,7 +129,8 @@ func writeConfig(menuList []menuEntry) {
 	// insert
 	lines = append(lines[:st], append(output, lines[st:]...)...)
 	// write
-	err = writeLines("config.toml", lines)
+	log.Info("writing to config.toml")
+	err = writeLines(configFile, lines)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -151,6 +152,15 @@ func searchAndReplace(path, parent, searchWordPtr string) {
 		}
 	}
 
+}
+
+func indexOf(array []string, index string) int {
+	for i, entry := range array {
+		if entry == index {
+			return i
+		}
+	}
+	return -1
 }
 
 func within(array []menuEntry, parent string) bool {

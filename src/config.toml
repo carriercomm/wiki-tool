@@ -1,0 +1,19 @@
+
+# WIKI_MENUS_START
+[[menu.wiki]]
+name="wiki"
+parent=""
+identifier="wiki"
+[[menu.wiki]]
+name="geometry"
+parent=""
+identifier="geometry"
+[[menu.wiki]]
+name="sub-geometry"
+parent="geometry"
+identifier="sub-geometry"
+[[menu.wiki]]
+name="scripts"
+parent=""
+identifier="scripts"
+# END
